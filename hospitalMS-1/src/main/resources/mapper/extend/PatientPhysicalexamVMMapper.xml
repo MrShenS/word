@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.briup.Hospital.dao.extend.PatientPhysicalexamVMMapper">
+  <resultMap id="BaseResultMap" type="com.briup.Hospital.bean.extend.PatientPhysicalexamVM">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="cost" jdbcType="DOUBLE" property="cost" />
+    <association column="patient_id" property="patient" select="com.briup.Hospital.dao.PatientMapper.selectByPrimaryKey"/>
+    <association column="physical_id" property="physicalexam" select="com.briup.Hospital.dao.PhysicalexamMapper.selectByPrimaryKey"/>
+  </resultMap>
+  
+  <select id="selectPatientPhysicalexamByPatientId" parameterType="int" resultMap="BaseResultMap">
+  	select * from patientphysicalexam,patient,physicalexam
+  	where
+  	patientphysicalexam.patient_id = patient.id
+  	and
+  	patientphysicalexam.physical_id = physicalexam.id
+  	and
+  	patient_id = #{id}
+  
+  </select>
+</mapper>

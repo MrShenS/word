@@ -1,0 +1,118 @@
+/*布局CSS*/
+body , ul, ol, dl, p, h1,h2,h3,h4,h5,h6 {
+	margin: 0;
+	padding: 0;
+}
+body {
+	font-family: '微软雅黑'
+	font-size: 14px;
+	color: #777;
+}
+a, a:hover , a:active, a:link{
+	color: #777;
+	text-decoration: none;
+}
+
+/*容器*/
+.b_container {
+	position: absolute;
+	left: 0;right: 0;
+	top: 0;bottom: 0;
+}
+
+.b_header , .b_footer {
+	background-color:#457CD6;
+	color:#fff;
+	position: absolute;
+	left: 0;right: 0;
+}
+/*头部*/
+.b_header {
+	top: 0;
+	height: 60px;
+	padding: 0 1em;
+}
+.logo , .loginInfo{
+	line-height: 60px;
+	height: 60px;
+}
+.logo {
+	float: left;
+	width: 240px;
+	font-size: 22px;
+}
+.loginInfo {
+	margin-left: 240px;
+	text-align: right
+}
+/*中间*/
+.b_content {
+	position: absolute;
+	top: 60px;
+	bottom: 30px;
+	left: 0;right: 0;
+}
+.b_content .b_left {
+	float: left;
+	height: 100%;
+	width: 230px;
+	border-right: 1px solid #ededed;
+	background-color: #F8F8F8;
+	overflow-y: scroll;
+}
+
+.b_content .b_left .menu ,.b_content .b_left .menu a {
+	color: #457CD6;
+}
+.b_content .b_left .menu i.fa {
+	margin: 0 .3em;
+}
+.b_content .b_left .menu dt {
+	padding-left: .5em;
+	height: 3em;
+	line-height: 3em
+}
+.b_content .b_left .menu dd {
+	padding-left: 2em;
+	line-height: 2.5em;
+	height:2.5em;
+	background-color: #fff;
+}
+
+.b_content .b_right {
+	margin-left: 230px;
+	box-sizing: border-box;
+	position: absolute;
+	left: 0;right: 0;
+	top: 0;bottom: 0;
+}
+
+.b_content .b_right .b_tip {
+	position: absolute;
+	left: 0;right: 0;
+	height: 3em;
+	line-height: 3em;
+	padding: 0 .5em;
+	border-bottom: 1px solid #ededed;
+	color: #457CD6;
+}
+
+.b_content .b_right .b_main {
+	position: absolute;
+	top: 3em;
+	bottom: 0;
+	left: 0;right: 0;
+	overflow-y: scroll;
+	padding: .5em;
+}
+
+/*底部*/
+.b_footer {
+	bottom: 0;
+	height: 30px;
+	line-height: 30px;
+	text-align: center;
+}
+
+
+

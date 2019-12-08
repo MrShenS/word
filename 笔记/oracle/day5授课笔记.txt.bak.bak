@@ -1,0 +1,1102 @@
+
+第十章：数据字典(了解)
+作用:帮助用户了解当前数据库的一些信息或是对象的信息或是用户的信息.
+	1).数据字典在数据库被创建时创建的。
+	2).数据字典中的数据被数据库服务器自动更新和维护
+
+1.常见的数据字典(它们都是视图)
+	USER开头的视图里面存放着用户自己拥有的对象(表、视图、索引、同义词、序列)
+	ALL开头的视图存放着用户有权限查看的对象
+	DBA开头的视图存放着数据库所有的对象
+	V$开头的视图存放数据库运行的一些性能属性数据
+
+2.以user开头的数据字典
+	包含当前用户所拥有的相关对象信息。
+	
+	//查询用户拥有的所有表的名字
+		select table_name 
+		from user_tables; 		
+	//查询用户对象表,找出对象类型是TABLE类型的对象名字
+	//table view sequence index(只要是唯一的列，默认索引) synonym等都是oracle中的对象
+	//注意【字符串的值是区分大小写】的
+		select object_name
+		from user_objects
+		where object_type = upper('table');
+		
+	//查询用户对象表,找出对象类型的类型都有哪些
+		select distinct object_type
+		from user_objects;
+		
+	//查询出s_emp表中的列及其对应的约束名字
+		select constraint_name, column_name
+		from user_cons_columns
+		where table_name = 'S_EMP';
+		
+	//查询出s_emp表中的约束名字
+		select	constraint_name
+		from	user_constraints
+		where	table_name = 'S_EMP';
+		
+3.以all开头的数据字典
+	包含当前用户有权限访问的所有对象的信息
+
+	//查到当前用户有权限访问的对象
+		select table_name from all_tables;  
+
+4.以dba开头的数据字典
+	包含数据库所有相关对象的信息。
+	//只能是有dba权限的用户查询,能查到数据库中所有对象
+		select table_name from dba_tables;
+		(conn切换用户,输入用户名system,  输入密码oracle)
+	
+5.其他视图
+
+	dictionary视图中只有俩列:
+		TABLE_NAME 表示当前【表的名字】
+		COMMENTS 表示对这个【表的描述】
+
+	SQL> desc dictionary
+	
+	名称
+	--------------------
+	TABLE_NAME
+	COMMENTS
+
+
+	select *
+	from dictionary
+	where table_name='USER_TABLES';
+
+	select *
+	from dictionary
+	where table_name='ALL_TABLES';
+
+	select table_name
+	from dictionary
+	where table_name like 'USER%';
+
+	select table_name
+	from dictionary
+	where table_name like 'V$%';
+
+
+第十一章：DML语句 和 事务控制
+	主要内容:
+	DML语句，直接操作数据库对象 里面的数据
+		insert into
+		update
+		delete
+	事务控制语句
+		commit
+		savepoint
+		rollback
+
+	sql语句的分类:
+		select查询语句
+		DML insert update delete 
+		DDL create alter drop truncate rename
+		DCL
+		事务控制语句 【针对DML】
+
+	DML: insert update delete
+	
+
+测试用表: 没有主外键关联
+	create table t_user(
+		id number,
+		name varchar2(50) constraint user_name_nn not null,
+		email varchar2(50),
+		gender char(1),
+		age number,
+		birthday date,
+		constraint user_id_pk primary key(id),
+		constraint user_email_un unique(email),
+		constraint user_gender_ck check(gender in('f','m'))
+	);
+	
+	drop table t_user;
+
+1.insert语句学习
+	向表中插入数据:
+	格式：【insert into 表名[(列名1,列名2,...)] values(对应值1，对应值2,...);】
+	
+	注意：在插入数据时，要特别【留意约束条件】。
+		
+	1).默认是向表中的每一个列中【依次】插入数据
+		insert into t_user values(1,'tom','abc','f',20,'11-8月-98');
+	
+		注意:违反任意一种约束那么就插入数据失败
+
+	2).也可以指明向表中的哪些列插入数据
+		insert into t_user(id,name,email,gender,age,birthday)  values(2,'tom','abc1','f',20,'11-8月-98');
+	
+		注意:可以任意交换下面列名的位置,只有values语句中的值也对应交换即可
+
+	3).列的值可以是null的话,那么也在插入的时候不指定这个列
+		注意:【unique约束】和【check约束】的值,都【可以为null】
+		【主键约束】和【非空约束】的值,都不可以为null
+		
+		insert into t_user(id,name,email,gender) values(3,'tom','abc3','f');
+		insert into t_user(id,name,email) values(3,'tom','abc4');
+		insert into t_user(id,name) values(5,'tom');
+
+		使用运行时参数设置需要输入表中的值
+		insert into t_user(id,name) values(&id,'&name');
+
+2.insert插入的特殊情况
+	我们可以把【select语句查询结果】插入到表中！
+	但是的有个【前提，就是查询列】的顺序和要插入表中列的【顺序一致】(数据类型)。另外查询结果值要【满足其他约束】条件。
+		insert into t_user(id,name,birthday) 
+		select id,last_name,start_date 
+		from s_emp;
+	
+3.update语句
+	格式： update 表名 set 列名=值[,列名=值,...]
+		   [where ...]
+	
+	1).修改表中所有行的age值为20岁
+		update t_user set age=20;
+		
+	2).修改表中所有数据的age和gender的值
+		update t_user set age=25,gender='m';
+		
+	3).修改表中id小于10数据的age和gender的值为null
+		update t_user set age=null,gender=null where id<10;
+		
+	4).修改id为18的用户的名字为zhangsan
+		update t_user set name='zhangsan' where id=18;
+		
+	
+4.delete语句
+	格式：delete from 表名 [where ...];
+		
+	1).删除表中id大于20的用户信息
+		delete from t_user where id>20;
+		
+	2).删除名字为张三的用户信息
+		delete from t_user where name='zhangsan';
+		
+	3).删除表中所有的数据
+		delete from t_user;
+
+	以上是DML语句(insert update delete)语句的基本用法,下面我们重点测试一下【主外键相关的DML操作】。
+
+5.进一步使用DML操作
+	测试主外键关联的情形
+	先准备两个表，里面有主外键。
+	create table t_customer(
+			id number,
+			name varchar2(20) constraint customer_name_nn not null,
+			constraint customer_id_pk primary key(id)
+	);
+
+	create table t_order(
+		id number,
+		price number,
+		customer_id number,
+		constraint order_id_pk primary key(id),
+		constraint order_cid_fk foreign key(customer_id) references t_customer(id)
+	);
+	
+	drop table t_order;
+	drop table t_customer;
+	
+1).准备操作数据insert语句：
+	//t_customer表中插入数据
+	insert into t_customer(id,name) values(1,'tom1');
+	insert into t_customer(id,name) values(2,'tom2');
+	insert into t_customer(id,name) values(3,'tom3');
+
+2).往t_order表中插入正常数据
+	//customer_id外键列的值必须是t_customer表中出现过的
+	insert into t_order(id,price,customer_id) values(1,1000,1);
+	insert into t_order(id,price,customer_id) values(2,2000,2);
+
+	
+3).表中插入无效数据
+	//插入出错,因为6这个值并没有在t_customer表中出现过的
+	insert into t_order(id,price,customer_id) values(3,3000,6);
+
+4).其他注意事项
+	//t_order表中插入数据
+	//默认情况下,【外键列值可以为空】
+	insert into t_order(id,price,customer_id) values(3,3000,null);
+	insert into t_order(id,price) values(4,4000);
+	注意:如果在外键列上加一个非空约束,那么这个外键列的值就不能为null了【可以给一个列上添加多种约束】
+
+	//t_order表中插入数据
+	//默认情况下,【外键列上值可以重复】
+	insert into t_order(id,price,customer_id) values(5,5000,1);
+	insert into t_order(id,price,customer_id) values(6,6000,1);
+	注意:如果在外键列上加一个唯一约束,那么这个外键列的值就不能重复了(可以给一个列上添加多种约束)
+
+	
+6.update语句
+1).准备工作
+	把俩个测试表删除，然后重新创建,再往表中插入一些数据
+		drop table t_order;
+		drop table t_customer;
+		
+	//t_customer表中插入数据
+		insert into t_customer(id,name) values(1,'tom1');
+		insert into t_customer(id,name) values(2,'tom2');
+		insert into t_customer(id,name) values(3,'tom3');
+	
+	//t_order表中插入数据
+		insert into t_order(id,price,customer_id) values(1,1000,1);
+		insert into t_order(id,price,customer_id) values(2,2000,2);
+		
+2).修改指定列的值
+	//把t_order表中id=1的数据的customer_id列修改为3
+		update t_order set customer_id = 3 where id = 1;
+
+	//把t_order表中id=1的数据的customer_id列修改为null
+		update t_order set customer_id = null where id = 1;
+	
+注意，主外键约束相关的列，修改的值一定要符合要求。
+	//把t_order表中id=1的数据的customer_id列修改为20
+		update t_order set customer_id = 20 where id = 1;
+	sql执行出错,因为就没id=20的顾客
+
+	
+7.delete语句
+1).普通删除情况
+	//删除t_order表中的的所有数据
+		delete from t_order;
+	可以成功删除,没有问题,因为删除t_order不会对t_costomer表的数据产生任何影响.
+		
+		
+	//t_order表中插入数据
+		insert into t_order(id,price,customer_id) values(1,1000,1);
+		insert into t_order(id,price,customer_id) values(2,2000,2);
+
+		
+	//删除t_customer表中id=3的数据
+		delete from t_customer where id = 3;
+	可以删除成功,t_order表中外键列中没有引用过这个值
+		
+		
+2).删除时候特殊情况
+	//删除t_customer表中id=1的数据
+		delete from t_customer where id = 1;
+		delete from es_customer where id = 6;
+	删除失败,因为t_order表中外键列中已经引用了这个值
+		
+8.on delete语句
+	【在上述那样的情况下,on delete 语句就可以起作用了】
+	级联cascade针对表的删除， on delete针对表中列的删除
+	on delete语句
+		on delete no action【默认情况:什么不都写】
+		on delete cascade
+		on delete set null
+		
+	1).情形1测试，默认情况下的on delete
+		如果在【建外键的时候,不加on delete语句,就是on delete no action】
+		
+	例如:
+	先建立两张表，主外键关联
+		create table t_customer(
+			id number,
+			name varchar2(20) constraint customer_name_nn not null,
+			constraint customer_id_pk primary key(id)
+		);
+
+		create table t_order(
+			id number,
+			price number,
+			customer_id number,
+			constraint order_id_pk primary key(id),
+			constraint order_cid_fk foreign key(customer_id) references t_customer(id)
+		);
+		
+		//drop table t_order;
+		//drop table t_customer;
+
+	然后插入测试数据:
+		//t_customer表中插入数据
+		insert into t_customer(id,name) values(1,'tom1');
+		insert into t_customer(id,name) values(2,'tom2');
+		insert into t_customer(id,name) values(3,'tom3');
+		
+		//t_order表中插入数据
+		insert into t_order(id,price,customer_id) values(1,1000,1);
+		insert into t_order(id,price,customer_id) values(2,2000,2);
+
+	删除主键列数据
+		delete from t_customer where id = 1;
+		删除失败： ORA-02292: 【违反完整约束条件】 - 已找到子记录
+		
+	2).情形2测试 on delete cascade(应用在外表)
+	先建立两张表出来，
+	【声明外键列的时候在最后加上on delete cascade语句】
+		create table t_order(
+			id number,
+			price number,
+			customer_id number,
+			constraint order_id_pk primary key(id),
+			constraint order_cid_fk foreign key(customer_id) references t_customer(id) on delete cascade
+		);
+		
+	表中插入数据，为删除做准备；
+
+	最后做和上述操作相同的删除测试；
+		删除主表中 id为1的数据(外表中使用了1这个值)
+		delete from t_customer where id = 1;
+	删除成功,同时级联(cascade)删除了t_order表中所关联的那条数据。
+	
+	注意，【on delete 语句出现在外键列约束 后面】。
+
+	3).情形3，on delete set null
+	删除两张表，重新建立，在声明外键列的时候加入on delete set null语句
+		create table t_order(
+			id number,
+			price number,
+			customer_id number,
+			constraint order_id_pk primary key(id),
+			constraint order_cid_fk foreign key(customer_id) references t_customer(id) on delete set null
+		);
+
+	insert插入测试数据；
+	
+	开始删除测试，删除主表中id为1的行。
+		delete from t_customer where id = 1;
+		删除成功；
+	同时我们会发现,t_order表中所关联的那条数据的【外键值已经被设置为null】
+
+****************
+	
+1.数据库事务 DML
+	数据库操作过程中，如果操作有误，可以撤销相应操作(一系列);如果反复确定操作无误，可以使之生效。
+	
+	关键字: 
+		commit提交事务;
+		rollback回滚事务;
+		savepoint设置回滚点;
+	
+2.事务的产生与结束：
+	1).【DML语句执行】的时候,如果当前有事务,那么就使用这个事务;如果当前没有事务,这个执行的【DML就会产生一个新的事务】；
+		sqlplus test/test
+		insert
+		update
+		delete
+		create table ...;
+	2).只有DML语句才会产生事务,【其他语句不会产生事务】；
+	3).commit/rollback/DDL语句都可以把当前事务给结束掉；
+	4).【commit和DDL语句】结束事务的方式是把这个【事务提交】；
+	5).【rollback】结束事务的方式是把这个【事务回滚】。
+
+注意:		
+	【提交事务】是指让这个事务里面的【所有操作都生效】到数据库中；
+	【回滚】事务是指【撤销】这个事务里所有操作。
+		
+3.具体测试	
+测试用表:
+	create table t_customer(
+		id number,
+		name varchar2(20) constraint customer_name_nn not null,
+		constraint customer_id_pk primary key(id)
+	);
+	drop table t_customer;
+
+具体测试步骤:
+	1).使用俩个终端窗口,同一个账号登录到数据库中,观察事务是否提交对用户查看数据的影响
+		注:一个用户对A表做了DML操作,但是没有提交事务,这时候别的用户是不能对A表再做其他的DML操作。(为了保证数据的安全和一致性)
+		
+		insert into t_customer(id,name) values(1,'tom1');
+		insert into t_customer(id,name) values(2,'tom2');
+		
+	2).事务实例1
+		insert ....产生事务A
+		update ... 这个操作是事务A中的操作
+		insert ..  这个操作是事务A中的操作
+		commit;    让事务A里面的三个操作生效、事务A结束
+		delete ... 产生新的事务B
+		insert ..  这个操作是事务B中的操作
+		insert ..  这个操作是事务B中的操作
+		insert ..  这个操作是事务B中的操作
+		rollback;  让事务B中的四个操作都撤销,事务B结束
+
+
+	3).事务实例2
+		insert ....产生事务A
+		update ... 这个操作是事务A中的操作
+		insert ..  这个操作是事务A中的操作
+		DDL语句;   事务A会被提交
+		rollback;  这时候回滚已经对事务A不起作用,因为事务A以及被提交了
+		
+		注:create语句 drop语句 alter语句,truncate,rename等都属于DDL语句
+		
+	4).回滚点/保存点 savepoint
+		例如:
+		DML语句1
+		savepoint A
+		DML语句2
+		savepoint B
+		DML语句3
+		rollback to A/B
+
+		这个时候可以通过这个回滚点让事务回滚到指定的位置,如果不指定回滚点而是【直接rollback】,那么【事务会一下子回滚完】。
+
+	特别注意:
+		【rollback to】到回滚点之后,这个【事务可能并没结束】,这个时候还可以接着回滚或者commit提交事务。
+
+		create table t_user(
+			id number primary key,
+			name varchar2(100),
+			salary number
+		);
+		drop table t_user;
+		例如:
+		insert into t_user values(1,'tom',1000);
+		savepoint A;
+		insert into t_user(id,name) values(2,'zs');
+		savepoint B;
+		delete from t_user;
+		rollback to B;
+
+		然后查询看结果
+		select * from t_user;
+
+		
+4.事务特征ACID(了解)
+	原子性：Atomicity
+		同时成功或者同时失败
+	一致性：Consistency 
+		事务执行的结果必须是使数据库从一个一致性状态变到另一个一致性状态。
+	隔离性：Isolation 
+		事务操作应该相互独立
+	持久性：Durability 
+		事务所做的影响 ，在事务结束之后应该能够是持久的。	
+
+5.isolation事务隔离级别(了解)
+		
+事务中会产生的问题:
+
+	1).脏读  主要针对update操作。 一个事务A读到另一个事务B中修改过但是还没有提交的数据
+
+	2).不可重复读  主要针对update操作。 一个事务A在第一次读数据和第二次读数据之间,有另一个事务B把这个数据更改并提交了,所以就出现了事务A里面读一个数据俩次,但是读到的结果是不同的。
+
+	3).幻读  主要针对的是insert/delete操作。事务A第一次用where条件筛选出了10条数据,事务A第二次用同样的where条件筛选出的却是11条数据,因为事务B在事务A的第一次和第二次查询直接进行了插入操作,并且插入的这个数据满足事务A的where筛选条件.
+
+		
+	事务隔离级别有:
+		read-uncommitted  不提交也能读
+		read-committed    提交之后才能读 解决了脏读
+		repeatable-read   解决了脏读和不可重复读
+		serializable      三个问题都解决了
+
+	【级别越高解决的问题越多但是效率越低】。
+	注意:并不是所有数据库都支持这四种事务隔离级别,比如【oracle就只支持第二种和第四种】这俩种,比如mysql就四种全支持.
+
+	oracle里面【默认的事务隔离级别是第二种】:read-committed
+
+	oralce里面设置事务隔离级别:
+		Set Transaction Isolation Level Read Uncommitted
+		Set Transaction Isolation Level Read Committed
+		Set Transaction Isolation Level Read Repeatable
+		Set Transaction Isolation Level Serializable
+	
+	此知识点重点了解，后期框架的学习会具体涉及。
+
+******************
+
+第十二章: 修改表和约束(alter语句)  
+	alter也属于DDL语句。 
+		update修改，修改数据库表|视图中数据；
+		alter修改对象结构。
+	
+1.准备测试用表
+	create table t_user(
+		id number constraint user_id_pk primary key,
+		name varchar2(100),
+		salary number
+	);
+	//drop table t_user;
+
+
+2.alter具体作用
+	alter可以修改表的结构，具体格式为:
+		alter table 表名 add|drop|modify|disable|enable ...;
+	
+	2.1 在表中【添加一个新列】
+		alter table t_user
+		add birthday date;
+
+	2.2 【删除表的某列】
+		alter table t_user
+		drop column birthday;
+
+	2.3 给表中的【列添加约束】
+		这个约束相当于之前的表级约束
+		alter table t_user
+		add constraint user_name_un
+		unique(name);
+	
+		//测试刚添加的唯一约束是否生效
+		insert into t_user(id,name) values(1,'zs');
+		insert into t_user(id,name) values(2,'zs');
+	
+	2.4 【删除表中的约束】
+		alter table t_user
+		drop constraint user_name_un;
+		
+	2.5 修改表中某列的类型
+		alter table t_user
+		modify name varchar2(100) not null;
+
+	2.6 让【约束失效】(必须知道约束的名字)
+		alter table t_user
+		disable constraint user_id_pk cascade; 
+		(该主键可能被其他表引用 作为外键使用，cascade级联会使之失效)
+	
+		//测试是否设置成功
+		insert into t_user(id,name) values(1,'zs1');
+		insert into t_user(id,name) values(1,'zs2');
+
+	2.7 让失效的【约束再次生效】
+		alter table t_user
+		enable constraint user_id_pk;
+
+3.其他DDL操作
+	truncate截断
+	rename重命名
+	
+	3.1 截断表中的数据
+		截取不需要提交,默认已经提交,并且不能回滚
+			truncate table t_user;
+		相当于(将表中数据全部删除，然后提交):
+			delete from t_user;
+			commit;
+
+	3.2 修改表的名字
+		rename t_user to mytest;
+		rename mytest to t_user;
+	
+4.注释操作(了解)
+	comment是oracle数据库系统关键字，可以用来给表或列添加注释，有利于用户对表结构以及数据库对象含义的理解。
+	用户可以利用数据字典查看comment定义的信息。
+	1).给表添加注释
+		格式:
+		comment on table 表名 is '注释';
+		
+		comment on table t_user is '很好';
+	
+	2).给列添加注释
+		格式:
+		comment on column 表名.列名 is '注释';
+		comment on column t_user.name is 'good';
+		
+	3).查看表中注释(利用【数据字典】)
+		select * from user_tab_comments 
+		where table_name=upper('t_user');
+	
+	4).查看列中的注释
+		select * from user_col_comments 
+		where 
+		comments is not null 
+		and 
+		table_name=upper('t_user');
+
+对象: 表 视图 索引 序列 同义词
+第十三章: 序列
+	Sequence 序列
+	作用:帮用户自动生成主键列的值(非空唯一)
+	
+	currval  nextval
+	序列名.currval;
+	序列名.nextval;
+
+1. 创建序列
+	一般不需要设置sequence的属性,使用默认的方式去创建就可以了.
+	基本格式:
+		create sequence 序列名;
+
+	完整格式:
+		create sequence 序列名
+		[INCREMENT BY n]  每次拿出值加多少
+		[START WITH n]    初始值从几开始
+		[{MAXVALUE n | NOMAXVALUE}]  最大值
+		[{MINVALUE n | NOMINVALUE}]  最小值
+		[{CYCLE | NOCYCLE}]
+		[{CACHE n | NOCACHE}] 		
+		
+	如果需要设置属性,那么就加上下面的语句.
+		[INCREMENT BY n]  每次拿出值加多少
+		[START WITH n]    初始值从几开始
+		[{MAXVALUE n | NOMAXVALUE}]  最大值
+		[{MINVALUE n | NOMINVALUE}]  最小值
+		[{CYCLE | NOCYCLE}]  到了最大值后是否循环(如果【循环会从1开始】,不循环出错)
+		[{CACHE n | NOCACHE}] 每次在缓存里面放多少个值.
+
+
+2.具体实例
+	1).创建序列并设置属性
+		create sequence seq_test 
+		increment by 2
+		start with 44
+		maxvalue 60
+		minvalue 10
+		cycle
+		nocache;
+		
+	使用默认属性创建序列
+		create sequence seq_test;
+
+	2).删除序列(格式类似 删除表)
+		drop sequence seq_test;
+
+	3).具体序列操作
+		对应序列,我们只有俩种操作:
+		a.获得序列中的下一个值 【序列名.nextval】
+			//这个值对于当前这个序列来的其他值来说,肯定是非空唯一
+			select seq_test.nextval
+			from dual;
+
+		b.查询序列中当前的值是多少【序列名.currval】
+			select seq_test.currval
+			from dual;
+
+	
+	4).实际应用
+		向t_user表插入数据,其中id值可以需要生成
+		create table t_user(
+			id number constraint user_id_pk primary key,
+			name varchar2(100),
+			salary number
+		);
+		drop table t_user;
+	
+		//创建序列
+		drop sequence seq_test;
+		create sequence seq_test;
+		
+		//插入数据 使用序列产生id值
+		insert into t_user(id,name,salary)
+		values(seq_test.nextval,concat('tom',seq_test.currval),2000);
+
+	5).通过数据字典 查询当前用户中 已经定义的序列
+		select sequence_name
+		from user_sequences;
+	
+第十四章: 视图view
+1.视图概念
+	视图就是【提取一张或者多张表的数据】生成一个映射，操作视图可以达到【操作原表】的效果，【方便数据的管理】以及实现【更安全】操作。
+
+2.视图的作用:
+	a.安全性 隐藏表中的重要数据
+	b.简单性 代替一些比较长的sql语句
+
+3.视图的分类
+	视图可以分为两类，简单视图和复杂视图。
+	
+	简单视图:
+	   视图所代表的select语句中基于单个基表，且不包含函数和数据分组操作。
+	   
+	复杂视图
+	   视图所代表的select中如果【有group by语句】,或者【有组函数】,或者【查询的是多张表】,那么这样的视图就是复杂视图.
+	   
+	注意: 仅仅由多表查询的复杂视图，可以删除数据成功，但是【删除的是外表】 中的数据，主表不会受到影响。
+
+
+4.简单视图和复杂视图的区别
+	通过【简单视图可以修改】原来表中的数据, 这些修改包括插入数据，更新数据和删除数据。
+	
+	但是对于【复杂视图】来说, 通过视图修改数据必须满足一定的规则。
+	
+	复杂视图是可以删除数据的，会影响到原表。
+			  可以插入数据，但是有一定限制。
+
+5.创建与删除视图
+创建视图(【由select语句获得视图】)
+	CREATE [OR REPLACE] [{FORCE|NOFORCE}] VIEW view_name
+	AS
+	SELECT查询
+	[WITH CHECK OPTION]
+	[WITH READ ONLY];
+
+	OR REPLACE：如果视图已经存在，则替换旧视图。
+    FORCE：即使基表不存在，也可以创建该视图，但是该视图不能正常使用，当基表创建成功后，视图才能正常使用。
+    NOFORCE：如果基表不存在，无法创建视图，该项是默认选项。
+	WITH CHECK OPTION： 指出在视图上所进行的修改都要符合select_statement 所指定的限制条件.
+    WITH READ ONLY：说明视图是只读视图，不能通过该视图进行增删改操作。现实开发中，基本上不通过视图对表中的数据进行增删改操作。
+
+		
+	删除视图
+		drop view 视图名字;
+
+注意: 
+	在视图定义时没有with read only的前提下,如果视图包含下面内容
+		a.分组函数
+		b.group by
+		c.表达式
+		d.rownum伪列
+	则不可以通过【视图删除】表中内容。
+	
+	【插入数据】时，除了要满足以上要求，还要满足【没有被视图包含的列】可以为null值。
+	如果建立视图时包含with check option，则还需满足指定约束条件。
+	
+	【视图主要用来查询，尽量不要DML操作】。
+		
+		
+6.实际案例
+	1).准备测试表:
+		create table t_user(
+			id number constraint user_id_pk primary key,
+			name varchar2(100),
+			salary number
+		);
+		//drop table t_user;
+	
+	2).插入测试数据:
+		insert into t_user(id,name,salary) 
+		select id,last_name,salary
+		from s_emp;
+
+	3).创建视图 
+		create or replace view v_test
+		as
+		select *
+		from t_user
+		where id > 10;
+
+	4).查看视图内容
+		select *
+		from v_test;
+
+
+	具体测试：
+		通过*简单视图* 对原来的表进行数据的删除/更新/插入
+		delete from v_test where id=16;
+
+		update v_test set name = 'zhangsan' where id = 20;
+
+		insert into v_test(id,name,salary) values(28,'tom1',3000);
+	以上操作都可以成功。
+	
+	
+7.视图创建额外关键字
+	在创建视图时，在Sql语句的最后跟上指定关键字，可以添加额外的约束。
+	1).with read only语句 
+		特点:【只能】通过视图进行【查询】数据,不能修改
+		例如:
+			create or replace view v_test1
+			as
+			select *
+			from t_user
+			where id > 10
+			with read only;
+		
+		这个视图v_test将来只能查询,不能进行修改
+
+	2).with check option语句
+		特点:【通过视图修改的信息】，必须可以【通过这个视图能够显示】出来,否则就操作失败
+
+	准备测试用的表及其数据
+		drop table t_user;
+		create table t_user(
+			id number constraint user_id_pk primary key,
+			name varchar2(100),
+			salary number
+		);
+
+		insert into t_user values(1,'tom',1000);
+		insert into t_user values(2,'tom2',2000);	
+		
+	创建视图:
+		create or replace view v_test
+		as
+		select id,name,salary
+		from t_user
+		where id>20
+		with check option;
+		
+	查询视图中的数据
+		select * from v_test;
+
+	插入数据会报错，因为这个操作通过视图显示不出来
+		insert into v_test values(3,'tom3',3000);
+
+	更新也会失败 因为这个操作通过视图显示不出来
+		update v_test
+		set name='lily'
+		where id=1;
+
+	更新成功 因为这个操作通过视图可以显示出来
+		update v_test
+		set name='lily'
+		where id=2;
+	
+8.复杂视图
+	例如:
+		create or replace view v_test5
+		as
+		select id,avg(salary) avgs
+		from t_user
+		group by id;
+	
+	复杂视图尽量用来查询,不要DML，因为操作比较复杂。
+	
+****************
+
+	alter table 表名
+	add 列名 数据类型 约束;
+	add constraint 约束名(列名);
+	drop column 列名;
+	drop constraint 约束名;
+	modify 列名 数据类型 constraint 约束名 约束；
+	disable constraint 约束名 [cascade];
+	enable constraint 约束名；
+	
+	truncate table 表名;
+	rename 表名 to 新表名；
+	
+序列
+	sequence
+	create sequence 序列名
+	increment by n
+	start with n
+	maxvalue n|nomaxvalue
+	minvalue n|nominvalue
+	cycle|nocycle
+	cache|nocache;
+	
+	序列名.nextval  序列名.currval;
+	生成主键值。
+	
+视图
+	一张或多张表[原始数据|加工数据]的映射
+	create view 视图名
+	as
+	select语句；
+	简单视图  
+		一个表，没有group by，没有函数
+		增删改查 (符合基本约束)
+		操作视图 == 操作原表
+	复杂视图
+		多个表，函数，group by
+		增删改查(操作的是外表)
+******************
+	
+第十五章: 索引(index)
+1. 索引的概念
+	a. 类似书的目录结构
+	b. Oracle 的"索引"是建立在表上的【可选对象】，能提高SQL查询语句的速度
+	c. 索引直接指向包含所查询值的行的位置，减少磁盘I/O
+	d. 【索引和表是相互独立】的物理结构,删除或创建都不影响表本身。
+	e. Oracle 【自动使用并维护索引】，插入、删除、更新表后，自动更新索引
+		
+2. 索引的创建
+	索引的创建分为两种情况，自动创建和用户创建。
+		
+	1).自动创建
+		当在表中指定了primary Key或者unique约束时会【自动创建唯一值索引】。
+		
+	2).用户创建和删除
+		用户可以创建非唯一值索引以【提高在访问数据时的效率】。
+		
+		创建索引：
+			create index 索引名
+			on 表名(列名);
+		例如：
+			create index emp_index
+			on s_emp(last_name);
+			
+		删除索引:
+			drop index 索引名;
+		例如:
+			drop index emp_index;
+
+	创建成功后可以通过【数据字典】查看：
+		select index_name from user_indexes;
+
+3.给某列创建索引的原则（了解）
+	索引的最大优势是 提高效率。
+	a.列经常作为where子句的限定条件或者作为连接条件
+	b.列包含的数据量很大，并且很多非空的值。
+	c.两个或者更多列频繁的组合在一起作为where的限定条件或者连接条件
+	d.列总是作为搜索条件
+	e.索引查出的数据量占总数据量的2%~4%
+	f.索引不是越多越好，不是索引越多越能加速查找。
+	g.要建立索引的表不经常进行修改操作
+	
+	注意:
+		1.在表中的某一个合适的列加入上了索引,那么也只有在【数据量很大】的时候,【才能体现】出这个查询的【效率】.
+		2.【索引一旦建立成功】,那么之后这个索引就由【系统来管理】,我们自己是控制不了的.
+
+
+4.索引的种类(了解)
+	Single column 单行索引
+	Concatenated  多行索引
+	Unique		  唯一索引
+	NonUnique     非唯一索引
+	
+
+5.索引结构分类(了解)
+	B-tree(默认是这种结构)
+		适合大量的增、删、改（OLTP）；
+		不能用包含OR操作符的查询；
+		适合高基数的列（唯一值多）
+		典型的树状结构；
+	位图
+		做UPDATE代价非常高；
+		非常适合OR操作符的查询；
+		
+	反转关键字
+	基于函数
+
+第十六章: 用户权限控制
+1.创建用户(管理员权限)
+	具体语法:
+		create user 用户名 identified by 密码
+	例如
+		create user sz11o identified by sz110;
+
+2.删除用户
+	drop user zhangsan cascade;
+
+3.赋予权限
+	格式:
+		grant 具体权限s to 用户;
+		
+	例如:把建表 建序列 建视图的权限赋给zhangsan
+		grant create table,create sequence,create view 
+		to sz11o;
+
+	也可以把connect角色和resource角色赋给zhangsan
+		角色是一组权限的集合
+		grant connect,resource to zhangsan;
+
+	注意: 只是登陆oracle数据库的话 需要的权限是【create session】登录权限
+	
+4.修改密码
+	(password zhangsan也可以修改密码)
+	alter user 用户名 identified by 密码;
+
+	例如:
+		alter user zhangsan identified by zhangsan123;
+
+5.赋予某一个用户某种对象操作的权限
+	grant 操作 on 对象 to 用户名;
+	注意，给指定用户赋予操作某种对象的权限，对象可以是表，也可以是视图，还可以是索引等等。
+	
+	具体测试:
+	步骤1：使用jd1713用户登录，然后给zhangsan用户授予查询权限
+		grant select 
+		on t_user 
+		to zhangsan; 
+	
+	步骤2：使用zhangsan用户登录，然后测试select语句是否可以使用
+		select *
+		from t_user;
+	注意，这样写会出错，系统会在当前用户中找t_user这个对象。
+	所以必须改成 jd1713.t_user;
+		select *
+		from jd1713.t_user;
+	
+	也可以查看表结构:
+		desc jd1713.t_user;
+
+6.回收权限
+	revoke operator on object from user;
+	例如:
+		revoke select 
+		on t_user 
+		from zhangsan;
+	
+7.同义词synonym(别名)
+	作用:可以隐藏表原来的名字。
+	思考一下dual，任何用户都可以使用这个对象，但是并没有正常使用  【用户名.dual】，为什么？ 就是因为dual是一个同义词。
+	
+	分为:私有同义词 公共同义词
+	
+8.私有同义词
+	【注意：同义词 和 原对象 是同一个东西】。
+	创建私有同义词格式：
+		create synonym 同义词
+		for 对象名;
+		
+	1).给表t_user创建一个私有同义词
+		create synonym my_test
+		for t_user;
+		
+		创建成功后，一个表有俩名字。
+	
+	2).给用户zhangsan授权可以查询my_test
+		grant select 
+		on my_test 
+		to zhangsan; 
+
+	3).收回用户zhangsan查询my_test的权限
+		revoke select 
+		on my_test 
+		from zhangsan;
+	
+	//利用数据字典查看同义词synonyms
+	//用户创建的同义词有哪些
+		select synonym_name
+		from user_synonyms;
+
+	//用户有权利查询的同义词有哪些
+		select synonym_name
+		from all_synonyms;
+
+	//用户有权利查询的同义词有哪些是以字母D开头的
+	//注意:表中的数据都是大写存在
+		select synonym_name
+		from all_synonyms
+		where synonym_name like 'D%';
+	结果可以看到我们常用的dual
+
+9.删除同义词synonym
+	
+	格式:
+	drop [public] synonym 同义词;
+
+	删除私有同义词
+		drop synonym my_test;
+		
+	删除公共同义词
+		drop public synonym my_test;
+
+10.公共的同义词
+	dual就是【公共的同义词,所有用户都可以使用】。
+	
+	注意，普通用户没有权限创建 public synonym公共同义词，
+	所以我们需要用dba的身份登录到数据库中去创建,sqlplus "/as sysdba",或者使用系统管理员system用户登录创建。
+
+	1).创建同义词:
+		create public synonym psyn
+		for jd1713.t_user;
+		
+		jd1713.t_user表示的是jd1713用户下面的t_user对象。
+
+	2).将查询这个同义词的权限赋予所有人
+		grant select on psyn to public;
+
+	3).然后使用其他用户登录，就可以通过这个公共的同义词来查询jd1713用户下面的t_user对象了。
+	
+	【dual就是一个公共的同义词】
+	
+10,数据库的导入导出
+	应用场景: 	
+		你现在项目里面使用数据库，保存了一定量的数据；现在重装系统，重装数据库软件(数据丢失)，重装之前，就可以使用导出exp命令 数据库进行备份；
+		重装完成以后，使用imp导入 命令 将数据库数据重新导入 数据库里面。
+	
+	系统终端执行
+	  导出：exp   根据提示按回车下一步即可
+	  导入：imp	  根据提示按回车下一步即可
+	  
+	1).具体导出过程
+		先exit退出登录，调整当前工作路径到合适位置(cd 路径名)
+		命令行输入exp
+		输入用户名 密码  【输入jd1713 jd1713，导出jd1713用户信息】
+		按照提示，全部默认往下操作
+		操作完成后，当前工作目录下多出一个目录。
+		
+	导入过程：
+		退出登录 
+		切换到正确的工作目录
+		imp 输入对应用户名和密码 【zhangsan zhangsan】
+		按照提示，全部默认往下操作 【中间有个验证，输入jd1713这个用户即可】
+		导入成功后，sqlplus登录进去，查询有没有多出来的表。
+

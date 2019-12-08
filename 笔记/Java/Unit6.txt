@@ -1,0 +1,525 @@
+ 第六章：Java高级编程之第一部分
+目标：
+	1.static关键字：静态变量，静态方法，静态代码块和静态导入。
+	2.final关键字：final修饰的类、变量和方法
+	3.访问控制：public，private，protected，default
+	4.抽象类和抽象方法
+	5.接口
+	6.内部类
+	7.Object类和String类
+
+static关键字：
+	1.static关键字能够修饰类（仅限于内部类），变量，方法；static修饰的变量称之为静态变量或者叫类变量，static修饰的方法称之为静态方法或者类方法。
+	     类变量和类方法区分于成员变量和成员方法；
+
+	2.static所修饰的变量被该类的所有对象所共享；
+
+	3.静态方法能够直接访问静态变量和静态方法，但是不能直接访问非静态变量（成员变量）和非静态方法（成员方法），
+	    如果需要访问非静态变量和方法，必须创建该类的对象类访问。
+
+	4.非静态方法可以直接访问静态变量和静态方法，也可以直接访问非静态变量（成员变量）和非静态方法（成员方法）。
+
+	5.静态代码块和构造代码的写法类似，只不过在代码块的起始位置有static关键字，并且静态代码块的作用和构造代码块的作用基本一致，
+	   但是静态代码块只随着类的加载而执行一次，构造代码块随着构造器的执行而执行。当静态代码块和构造代码块同时出现在一个类中的时候，静态代码块优先于构造代码块执行。
+		构造代码块：
+			{
+				代码;
+			}
+
+		静态代码块：
+			static{
+				代码;
+			}
+
+	6.父类中的静态方法只能被子类继承，不能被子类重写；如果子类中出现了和父类中同名同参数列表的方法，
+	   此时子类中的方法不能称之为重写，但是子类中的方法也必须静态的；父类的非静态方法不能被子类重写为静态。
+	   子父类中出现了同名同参的方法，要么都静态，要么都非静态。
+
+	7.被static所修饰的变量和方法可以由类名直接调用，也可以使用该类的对象调用，但是前者居多。
+
+	△8.由于静态变量被所有对象所共享，也可以不创建对象使用类名直接调用，那么可以不可以将一个类中的所有成员被静态修饰呢？
+	答：分情况。从Java代码角度理解没有问题。但是从实际情况来理解有问题，类是具有相同属性和相同行为的一类事物的抽象，对象是其中的一个个体，每个对象所对应的属性值不尽相同，如果类中的所有属性都被静态修饰，此时该类的每个对象获取到的值都是一致的，和实际情况不符合。所以在设计类的时候，需要考虑应该将哪些属性设置为静态，哪些属性不能设置为静态，而不能单纯的为节省内存空间将所有的属性都设置为静态。
+
+	△9.静态导入：将一个类中的静态属性进行导入。
+		语法：import static 包.类.静态属性;
+		语法：import static 包.类.*;
+
+		import java.util.*;
+		import java.util.Arrays;
+
+		Scanner sc=new Scanner(System.in);
+		Arrays.toString();
+
+		java.lang.*;
+		String
+
+		import static java.lang.System.out;
+		import static java.lang.System.in;
+
+		Scanner sc=new Scanner(in);
+
+		out.println();
+		out.println();
+		out.println();
+		out.println();
+
+	10.main方法：
+		定义：public static void main(String[] args){}
+
+		public：Java规定main必须是public修饰。
+
+		static：由于JVM在执行代码的时候只有当主方法执行了之后才能创建关于类的对象，在没有对象之前，JVM如果要调用main方法，则main方法必须是static修饰。
+			class Demo{
+				main(){
+					syso("aaaa");
+				}
+			}
+
+			> javac Demo.java
+			> java Demo
+			上面的代码“java Demo”实际上是JVM在调用“Demo.main()”。
+		
+		void：由于JVM直接调用某个类的main方法，但是JVM不需要这个方法给她返回任何值，所以返回值类型是void。
+
+		main：方法名。
+
+		String[] args：在执行某个类的时候传递给主方法的形式参数。
+			问：如何给main方法传递实际参数呢？
+			答：在使用java命令执行某个类的时候，将参数直接跟在类名后面即可，多个参数之间以空格分割；
+			         如果参数中本身就包含空格，则将该参数使用双引号包裹。
+		class MainTest{
+			main(String[] args){
+				syso(args.length);
+			}
+		}
+		class Person{
+	static{
+		代码1;
+	}
+
+	{
+		代码2;
+	}
+
+	static int x=10;
+	double z=20.0;
+	static void show(){}
+	void func(){}
+}
+
+class Student exts Person{
+	staitc{
+		代码3;
+	}
+	static Abc a=new Abc();
+
+	{
+		代码4;
+	}
+
+	static int a=5;
+	String name="zhangsan";
+	static void show(){}
+	void show(int x){}
+	void func1(){}
+}
+
+class Demo{
+	main(){
+		Student stu=new Student();
+	}
+}
+
+1.编译：
+	1.编译Person类；
+	2.编译Student类；
+	3.编译Demo类。
+	***：在编译阶段只会分析每个类中需要哪些类，以及分析该类中的语法错误；并不会进行类加载，因为类加载是运行
+	          期所做的。
+2.运行：
+	> java -cp bin Demo
+	0.Java在运行一个程序时，会先将该程序所需的所有的类全部都加载到内存中之后才会从指定的类的主方法开始执行。
+
+	1.进行类加载：
+		1.加载Person类，将Person.class加载到内存的数据区（静态区，方法区）；
+			1.将静态变量，静态方法，静态代码块全部加载到静态区；
+			2.将非静态方法加载到方法区；
+			3.执行静态代码块中的代码，也就是执行“代码1”；
+		2.加载Student类，将Student.class加载到内存的方法区。
+			1.将静态变量，静态方法，静态代码块全部加载到静态区；
+			2.将非静态方法加载到方法区；
+			3.执行静态代码块中的代码，也就是执行“代码3”；
+		3.加载Demo类，将Demo.class加载到内存的方法区。
+			1.将静态变量，静态方法，静态代码块全部加载到静态区；
+			2.将非静态方法加载到方法区；
+	2.开始执行Demo类中的main方法，其实是JVM执行了“Demo.main”；让main方法进行方法栈。
+	3.执行Student stu=new Student();
+		1.在栈区（main方法栈中），会有一个变量Student stu产生；
+		2.执行new Student();的整个过程：
+			0.先执行Student类的构造器中的super();：
+				0.执行Person的构造代码块，执行代码2；
+				1.执行new Person();
+				2.开辟空间，创建对象；
+				3.在内存中存放double z;
+				4.对double z进行隐式初始化：double z=0.0;
+				5.对double z进行显式初始化：double z=20.0;
+			1.执行Student类中的构造代码块；
+			2.执行new Student();
+			3.new 开辟空间；
+			4.Student告诉JVM在这片空间中应该存放什么类型的对象；
+			5.执行构造器，创建该类型的对象。
+			6.在内存中存放String name;
+			7.对String name进行隐式初始化：String name=null;
+			8.对String name进行显式初始化：String name=“zhangsan”;
+		3.把Student对象在堆内存中的地址复制一份赋值给栈区中的main方法中的stu变量。
+
+final关键字：最终的。
+	1.修饰类，final修饰的类不能被继承；在JDK中最常见的final修饰的两个类是System类和String类。
+			String str="abc";
+			String str=new String("abc");
+
+	2.修饰变量，final修饰的变量不再称之为变量，而是称之为常量，因为final修饰的变量的值不能再改变；既能修饰成员
+	                      变量，也能修饰局部变量。当final修饰引用变量的时候，该变量中存储的堆内存的地址值是不能变的，但
+			      是堆内存中那个对象中的成员变量的值是可以更改的。
+			      final Student stu=new Student();
+
+	3.修饰方法，final修饰的方法不能被重写，但是能被子类继承。
+
+	4.全局静态常量：
+		定义：public static final 数据类型 常量名=值;
+		例如：public static final String COUNTRY="zh_CN";
+		说明：final修饰的变量称之为常量，对于常量名的书写规范：
+			1.如果常量名由一个单词组成则整个单词的所有字母都大写；
+			2.如果常量名由多个单词组成则全部字母都大写，每个单词之间用下划线分割。
+				final String COUNTRY="zh_CN";
+				final String MY_COUNTRY="zh_CN";
+
+	5.当final修饰的是全局变量时，必须对该变量进行显式初始化；
+		1.final int NUM=100;
+		2.在构造器中：
+			class Demo{
+				final int NUM;
+				Demo(){
+					NUM=100;
+				}
+			}
+	6.当final修饰的是局部变量时，在使用该变量之前必须要进行初始化，并初始化之后是不能再改变值的。
+
+访问控制：权限修饰符，public，private，protected，default。
+	用于控制在类中访问成员的权限。
+
+	public：能修饰类，变量，方法。public在修饰类时，该类所在的Java文件的文件名必须和该类名相同；而且在一个Java文件中最多只能有一个public所修饰的类。
+		同包同类：public修饰的变量和方法都能被访问。
+		同包不同类：public修饰的变量和方法都能被访问。
+		不同包不同类：public修饰的变量和方法都能被访问。
+		同包子类：public修饰的变量和方法都能被访问。
+		不同包子类：public修饰的变量和方法都能被访问。
+
+	private：能修饰类（仅限于成员内部类），成员变量，方法。private所修饰的变量和方法只能在本类（同包同类）中访问。
+		同包同类：private修饰的变量和方法都能被访问。
+		同包不同类：private修饰的变量和方法都不能被访问。
+		不同包不同类：private修饰的变量和方法都不能被访问。
+		同包子类：private修饰的变量和方法都不能被访问。
+		不同包子类：private修饰的变量和方法都不能被访问。
+
+	protected：不能修饰类，能修饰成员变量，方法。
+		同包同类：能访问protected修饰的变量和方法。
+		同包不同类：能访问protected修饰的变量和方法。
+		不同包不同类：不能访问protected修饰的变量和方法。
+		同包子类：能访问protected修饰的变量和方法。
+		不同包子类：能访问protected修饰的变量和方法。
+
+	default：能修饰类，变量，方法。在Java中权限修饰符并没有default关键字，如果权限修饰符是default，也就是什么不都写。
+	                default关键字用于switch...case语句中。如果一个类的权限是默认的，则该类中的成员（成员变量和成员方法）只能在同包中访问。
+		同包同类：能访问。
+		同包不同类：能访问。
+		不同包不同类：不能访问。
+		同包子类：能访问。
+		不同包子类：不能访问。
+
+				同包同类	同包不同类		同包子类	不同包子类	不同包不同类
+	public		   √			√				√			√			√		
+	protected	   √			√				√			√			×		
+	default		   √			√				√			×			×		
+	private		   √			×				×			×			×         
+	
+
+
+
+	抽象类：
+	1.从面相对象的角度理解：将众多类中共同点进行抽取形成新的类，由于在新的类中没有办法直接描述这众多类中的每
+	    一种类的共同点，所以将新的类称之为抽象类，抽象类定义的是这众多类的一个标准。
+
+	2.从Java代码的角度理解：抽象类就是被abstract修饰的类。被abstract修饰的方法称之为抽象方法。
+
+	3.在抽象类中也可以具有一般方法。
+
+	4.抽象类中有构造器，但是不能直接创建对象。在抽象类中也可以显式的定义多个构造器。
+
+	5.由于抽象类不能直接创建对象，所以就不能直接使用抽象类；抽象类必须由子类继承，然后创建子类对象，通过子类
+	   对象来使用抽象类。
+
+	6.当子类继承了抽象类之后，必须重写抽象类中的全部抽象方法；如果没有重写抽象类中的全部抽象方法，则需要将子
+	    类也定义成抽象类。
+
+	7.抽象方法指的是abstract修饰的没有方法体的方法；抽象方法所在的类一定是抽象类，但是抽象类中不一定有抽象方法。
+
+	8.抽象类跟普通类一样，只能单继承，不能多继承。
+
+	9.抽象类的声明语法：
+		[public] abstract class 类名{}
+
+	10.抽象方法的声明语法：
+		[public] abstract 返回值类型 方法名(参数);
+
+	11.抽象类能不能用final修饰？不能，因为抽象类要使用只能被子类继承才能使用，但是final修饰的类是不能被继承的。
+
+	12.抽象类的意义：
+		1.减少代码量；
+		2.提高了代码的扩展性和复用性。
+
+		abstract class Animal{
+			int age;
+
+			Animal(int age){
+				this.age=age;
+			}
+
+			abstract void eat();
+
+			void ageRelease(){
+				age++;
+			}
+		}
+
+		class Person exts Animal{
+			void eat(){
+				syso();
+			}
+		}
+
+		class Cat exts Animal{
+			void eat(){
+				syso();
+			}
+		}
+
+	Animal anm=new Person();
+	new Animal();
+
+	△13.抽象类的子类的另一种体现方式：匿名类，匿名对象。
+		abstract class Animal{
+			abstract void eat();
+		}
+
+		// 显式地定义子类继承抽象类
+		class Person exts Animal{
+			void eat(){
+				syso(123);
+			}
+		}
+		new Person().eat();
+
+		// 匿名子类，匿名对象
+		new Animal(){
+			void eat(){
+				syso(123);
+			}
+		}.eat();
+
+		
+		// 匿名子类，匿名对象
+		Animal anm=new Animal(){
+			void eat(){
+				syso(123);
+			}
+		};
+		anm.eat();
+
+接口：
+	1.对类的高度抽象；将众多抽象类中的共性再抽象形成新的类（接口）；
+	2.如果抽象类中的方法全部都是抽象方法，则可以将该类定义为接口。
+
+	3.定义接口的关键字是interface；类和接口之间的关系是实现（implements关键字）关系，只能是类实现接口，并且一
+	  个类可以实现多个接口，即Java中有多实现，多实现是为了解决Java中的不能多继承的现象。
+
+	4.接口和接口之间的关系是继承关系，可以多继承。
+
+	5.接口的定义语法：
+		[public] interface I接口名{}
+
+	6.在接口中可以有变量，但是接口中的变量是全局静态常量；
+		定义语法：
+			[public static final] 数据类型 常量名=值;
+	
+	7.接口中的方法都是抽象方法，不能有方法体；
+		定义语法：
+			[public abstract] 返回值类型 方法名();
+
+		【补充：在Java8中，接口中可以有非抽象方法。Java8的新特性。】
+
+	8.接口中不存在构造器，不能创建对象。在接口中也不能显式的定义构造器。
+
+	△9.接口中可以不定义方法，但是一般会定义一个全局静态常量，这样的接口称之为“标记接口”，IO中有个序列化接口。
+
+	△10.如果在接口只定义一个抽象方法，则该接口称之为“函数式接口”，在编程过程中可以使用Lambda表达式来使用
+	         此接口。【Java8的新特性】
+
+	11.由于接口不能创建对象，只能是编写子类来实现接口。在子类中必须实现（重写）接口中的所有抽象方法；如果不
+	      能实现接口中的全部抽象方法，则需要将子类定义成抽象类。使用子类实现接口的两种方式：
+		1.显式的定义子类；
+	     △2.匿名子类。
+
+	12.接口的意义：
+		1.提高代码的扩展性；
+		2.高内聚，低耦合；
+		3.面向接口编程（IOP）。
+
+Object类：在Java中，Object类是所有类的父类；
+	常见的方法：
+		String toString();	返回当前类的对象的字符串表示形式。
+
+		Class getClass();	返回的是当前对象所属的类在内存中的镜像。
+			Class类中有一个方法：String getName()，该方法能够返回该类的名字。
+
+		int hashCode();	返回的是当前对象的哈希值（内存地址值的十进制）。
+
+		boolean equals(Object o);	返回的是判断调用该方法的对象和传入的参数对象的数据类型和数据内容（哈希值）
+		                                                是否一致。
+
+		问：==和equals的区别？
+		答：在基本数据类型中，==用于比较值是否相等；equals方法不能用于基本数据类型；
+		         ==在引用类型中，用于比较两个对象的内存地址值是否相等； equals方法：在没有重写Object类中的equals方法的时候，比较的是哈希值，
+			 如果重写了equals方法，则是按照重写的规则来比较。
+
+String类：
+	1.final修饰，不能被继承；
+	2.为了提高效率，字符串对象被保存在常量池中。
+
+	String str="hello";       // 代码1
+	String str=new String("hello");   // 代码2
+
+	问：代码1和代码2分别会在内存中创建几个对象？
+	     在字符串常量池中有“hello”时：
+	           代码 1    直接将String constant pool中的hello拿过来使用
+		   代码 2  需要创建一个对象 需要在编译期使用new创建一个对象 然后指向String constant pool中的“hello”
+	  在String constant pool中没用“hello”时
+	            代码 1 需要自己创建一个“hello”放在String constant pool中  在执行一次String constant pool中没有的步骤
+		    代码 2 同上。
+	内部类：在类的内部定义类。把内部类所在的类称之为外部类。
+	1.成员内部类：在类中定义的和该类的成员变量以及成员方法同级的类称之为成员内部类。
+		示例：
+			class Outter{
+				int x=10;
+
+				void show(){}
+
+				class Inner{
+					int z=20;
+
+					void func(){}
+				}
+			}
+
+		访问内部类中的数据：要访问内部类，就需要外部类对象；所以先创建外部类的对象，通过该对象创建内部类对象，然后访问内部类中的数据。
+			Outter out=new Outter();
+			Outter.Inner in=out.new Inner();
+
+			Outter.Inner in=new Outter().new Inner();
+
+		如果将成员内部类私有化，则该内部类产生的对象也是私有的，在其他类中不能直接访问。只能在外部类的方法中访问内部类数据，然后在其他类中访问外部类中的方法已达到访问私有化内部类中数据的目的。
+
+	2.静态内部类：将成员内部类使用static修饰就是静态内部类。
+		成员变量	静态变量    类变量
+		成员方法	静态方法    类方法
+		成员内部类	静态内部类
+
+		示例：
+			class Outter{
+				int x=10;
+				static int z=20;
+
+				static class Inner{
+					int x=30;
+
+					void show(){
+						syso("Outter.static Inner.show");
+					}
+				}
+			}
+
+		内部类的访问：
+			1.首先创建内部类对象，由于是静态的内部类，直接有外部类类名调用内部类类名，
+			    然后使用new关键字创建对象。
+			2.如果在静态内部类中要访问外部类的成员：
+				1.将外部类成员定义成静态，不推荐。
+				2.在内部类中创建外部类的对象，然后访问外部类的成员。
+			3.如果将内部类的成员定义为静态，则该内部类也必须定义为静态，即静态内部类。
+
+	3.局部内部类：
+		局部变量：在类中的所有变量中除了声明在类中的成员变量之外其他变量都是局部变量。
+
+		局部内部类：一般指的是定义在方法中的类。
+
+		示例：
+			class Outter{
+				int x=10;
+				void show(){
+					int z=100;
+
+					class Inner{
+						void func(){
+							syso("Outter.show.Inner.func");
+						}
+					}
+
+					new Inner().func();
+				}
+			}
+
+		访问局部内部类中的数据：
+			1.由于局部内部类是定义在方法内部的，外部类的对象不能直接访问方法中的局部数据，也就是外部类不能直接访问局部内部类中的数据。
+			2.只能在局部内部类所在的方法中创建内部类对象然后访问内部类中的数据。
+			3.局部内部类如果要访问该内部类所在的方法中的局部变量，该局部变量必须是final修饰。在Java8之前的版本中，必须显式的使用final关键字来修饰该局部变量；在Java8及Java8以后的版本中，可以不适用final关键字显式的修饰该局部变量。
+
+	4.匿名内部类：匿名内部类必须依托于抽象类或者接口才能使用。匿名内部类其实是某个抽象类的匿名子类或者是某个接口的匿名子类（实现类）。
+
+	                    	// 程序猿A写的代码
+		interface Animal{
+			void eat(int x);
+		}
+
+		class Demo{
+			void show(Animal anm){
+				anm.eat();
+			}
+		}
+
+		// 请程序猿B按需求编写程序：编写代码，调用Demo类中的show方法。
+			Demo d=new Demo();
+			d.show();
+
+			1.显式地创建接口的实现类，然后在show方法中传递该实现类的对象。
+				class Cat implements Animal{
+					public void eat(){
+						syso("cat eat");
+					}
+				}
+				Demo d=new Demo();
+				d.show(new Cat());
+
+			2.使用匿名类，当该类以实参的形式传递时，称之为匿名内部类，也称之为匿名对象。
+				Demo d=new Demo();
+				d.show(new Animal(){
+					public void eat(){
+						syso("...");
+					}
+				});
+
+			△3.使用Java8中的Lambda表达式，当接口中只有一个方法时，该接口称之为函数式接口。【Java8的新特性】
+				Demo d=new Demo();
+				d.show((x)->{
+					syso("...")
+				});
+
+

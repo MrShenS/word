@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.briup.Hospital.dao.extend.UserPatientVMMapper">
+  <resultMap id="BaseResultMap" type="com.briup.Hospital.bean.extend.UserPatientVM">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="price" jdbcType="DOUBLE" property="price" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="symptom" jdbcType="VARCHAR" property="symptom" />
+    <result column="advice" jdbcType="VARCHAR" property="advice" />
+    <result column="date" jdbcType="TIMESTAMP" property="date" />
+    <result column="complained" jdbcType="VARCHAR" property="complained" />
+    <result column="pastMedicalHistory" jdbcType="VARCHAR" property="pastmedicalhistory" />
+    <result column="historyOfPresentIllness" jdbcType="VARCHAR" property="historyofpresentillness" />
+    <result column="physicalExamResult" jdbcType="VARCHAR" property="physicalexamresult" />
+  	<!--关联user时同时把user所在的部门也查询出来  -->
+  	<association column="user_id" property="user" select="com.briup.Hospital.dao.extend.UserMapperVM.findUserWithDeptAndRoleById"/> 
+  	<association column="patient_id" property="patient" select="com.briup.Hospital.dao.PatientMapper.selectByPrimaryKey"> </association>
+  </resultMap>
+  
+  	<!-- 查询出所有未处理的病人 -->
+  <select id="selectUndealdPatient" resultMap="BaseResultMap" parameterType="java.lang.String">
+select *
+  	 from
+  	userpatient,patient,user
+  	where
+  	userpatient.user_id = user.id
+  	and
+  	userpatient.patient_id = patient.id
+  	and
+		department.id = user.department_id
+  	and
+  	userpatient.status = "未处理"
+  	and
+  	user.name=#{name}
+  </select>
+  <select id="select"   parameterType="int" resultMap="BaseResultMap">
+    select * from 
+    userpatient,patient,user
+  	where
+  	userpatient.user_id = user.id
+  	and
+  	userpatient.patient_id = patient.id
+  	 	and
+  	userpatient.status = "未处理"
+  	and
+  	user.id=#{id}
+
+  </select>
+  
+    <select id="selectByPatientId"   parameterType="int" resultMap="BaseResultMap">
+    select * from 
+    userpatient,patient,user
+  	where
+  	userpatient.user_id = user.id
+  	and
+  	userpatient.patient_id = patient.id
+  	 	and
+  	patient.id=#{id}
+
+  </select>
+  
+  
+  <select id="selectUserpatientWithUserAndPatient" resultMap="BaseResultMap">
+  	select * from userpatient
+  </select>
+  
+  <select id="selectUserpatientWithUserAndPatientById" parameterType="int" resultMap="BaseResultMap">
+  	select * from userpatient
+  	where id=#{id}
+  </select>
+  
+  <select id="selectUserpatientWithUserAndPatientByPatientId" parameterType="int" resultMap="BaseResultMap">
+  	select * from userpatient
+  	where patient_id=#{id}
+  </select>
+ 
+ 
+<!--   查询出所有已经处理的病人 -->
+  <select id="selectdealdPatient" resultMap="BaseResultMap" parameterType="int">
+  	select * from
+  	userpatient,patient,user
+  	where
+  	userpatient.user_id = user.id
+  	and
+  	userpatient.patient_id = patient.id
+  	and
+  	userpatient.status = "已处理"
+  	and
+  	user.id = #{id}
+  </select>
+  
+  <update id="updatePatientStatus" parameterType="int">
+  	update userpatient
+  	set status = "已处理"
+  	where
+  	id=#{id}
+  </update>
+</mapper>

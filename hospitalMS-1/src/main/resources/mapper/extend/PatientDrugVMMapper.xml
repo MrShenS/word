@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.briup.Hospital.dao.extend.PatientDrugVMMapper">
+  <resultMap id="BaseResultMap" type="com.briup.Hospital.bean.extend.PatientDrugVM">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="cost" jdbcType="DOUBLE" property="cost" />
+    <result column="num" jdbcType="INTEGER" property="num" />
+    <association column="patient_id" property="patient" select="com.briup.Hospital.dao.PatientMapper.selectByPrimaryKey"/>
+    <association column="drug_id" property="drug" select="com.briup.Hospital.dao.DrugMapper.selectByPrimaryKey"/>
+  </resultMap>
+  
+  <select id="selectPatientDrugByPatientId" parameterType="int" resultMap="BaseResultMap">
+  	select * from patient,drug,patientdrug
+  	where
+  	patientdrug.patient_id = patient.id
+  	and
+  	patientdrug.drug_id = drug.id
+  	and
+  	patientdrug.patient_id = #{id};
+  </select>
+</mapper>

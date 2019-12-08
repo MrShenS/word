@@ -1,0 +1,277 @@
+﻿Module 1  Solaris Computing Environment
+
+1.Linux：
+	Linux在服务器市场上展现了非比寻常的能力。世界各地有数百万志愿者为Linux提供技术支持和软件更新。其中包括IBM，Google，RedHat，Novell等IT跨国企业的资深学者和工程师。因为Linux的社区开发模式，是的Linux对于安全漏洞可以提供更快速的反应。在企业级应用领域，更少被病毒和安全问题困扰。
+	linux在系统性能方面同样表现出优势。Linux在实现相同功能时，消耗的资源更少。同时也更稳定。虚拟化技术，分布式计算，互联网应用等在Linux上可以得到很好的支持。Linux在服务器市场的份额一直再快速增长。
+	
+	总体来说，linux非常健壮好灵活，很适合用于大型企业生产环境。
+	
+2.Linux系统结构(洋葱图)
+	1.Kernel：内核
+		驱动硬件工作的第一个软件
+	2.Shell：提供给用户一种交互方式。基于命令式的交互
+	3.File System:文件系统
+	4.Application:应用程序
+
+3.Kernel：
+	内核是操作系统的核心，具有很多最基本功能：
+	1.它负责管理系统的进程、内存、设备驱动程序、文件和网络系统，决定着系统的性能和稳定性。
+	2.控制系统程序，系统工具和系统硬件的交互
+	3.管理交换空间，精灵程序，文件系统和其他功能。
+
+4.Shell
+    shell是系统的用户界面，提供了用户与内核进行交互操作的一种接口。它接收用户输入的命令并把它送入内核去执行，是一个命令解释器。另外，shell编程语言具有普通编程语言的很多特点，用这种编程语言编写的shell程序与其他应用程序具有同样的效果。
+	
+	目前主要有下列版本的shell。
+	1．Bourne Shell:是贝尔实验室开发的。由Stephen Bourne为AT&T Unix而写 
+				    是最早最有名的Shell。
+	2．BASH：是GNU的Bourne Again Shell，是GNU操作系统上默认的shell,大部分linux的发行套件使用的都是这种shell。
+	3．Korn Shell：是对Bourne SHell的发展，在大部分内容上与Bourne Shell兼容。 　　　
+
+	4．C Shell：是SUN公司Shell的BSD版本。
+	
+5.File System
+    文件系统是由目录，子目录，以及文件为了特定的目的而组合在一起的一个体系结构。
+	
+	目录：目录提供了管理文件的一个方便而有效的途径。
+	
+	子目录：
+	
+	文件：
+
+6.Pathname
+    一个路径名是通过它的位置唯一的标识一个普通文件或目录
+	
+	路径分为：
+		绝对路径：
+			1.以/开头的路径
+			2.局对路径用来指明文件或目录与/目录的关系
+		相对路径：
+			1.不以/开头的路径。
+			2.指定一个文件和当前工作目录之间的关系。
+7.linux文件系统结构：
+	　Linux使用标准的目录结构，在安装的时候，安装程序就已经为用户创建了文件系统和完整而固定的目录组成形式，并指定了每个目录的作用和其中的文件类型。
+		/: 根路径
+		/opt:存放自己安装的第三方的软件,补丁
+		/etc:系统管理和配置文件,随着系统启动就会读取的文件，如passwd等
+		/dev:设备文件，该目录存放的是linux的外部设备，如硬盘，分区，键盘，鼠标，usb等。
+		/usr:一般存放系统自带的,但是供所有用户使用的。最庞大的目录，要用到的应用程序和文件几乎都在这个目录、
+			/usr/include: linux下开发和编译引用程序所需要的头文件。
+			/usr/local: 本地增加的命令和库。
+			/usr/sbin: 超级用户的一些管理程序
+			/usr/src：源代码
+			/usr/bin: 众多的而应用程序，二进制可执行程序
+			/usr/share:共享文件
+			/usr/lib:常用的动态链接库和软件包的配置文件。
+		/boot:存放内核程序(unix叫kernel),系统启动文件，包括Grub,lilo启动器程序。
+		/var: 存放管理员特有的，如系统日志
+		/home:用来存放用户的主目录(用户家目录)。在Linux中，每个用户都有一个自己的目录，一般该目录名是以用户的账号命名的。
+		
+		/bin: 存放系统中最常用的可执行文件
+		/lib：存放共享的库文件，包含许多被/bin和/sbin中程序使用的库文件
+		/lost+found:这个目录一般情况下是空的，当系统非法关机后，这里就存放了一些零散文件
+		/media:ubuntu系统自动挂载的光驱、usb设备，存放临时读入的文件
+		/mnt：作为被挂载的的文件系统得挂载点。
+		/proc:这个目录是一个虚拟的目录，它是系统内存的映射，我们可以通过直接访问这个目录来获取系统信息，这里存放所有标志位文件的进程。
+		/root:该目录为系统管理员，也称作超级权限者的用户主目录。
+		/sbin:s就是Super User的意思，这里存放的是系统管理员使用的系统管理程序，如系统管理，目录查询等关键命令文件。
+		
+		/srv:存放系统所提供的服务数据
+		/sys:系统设备和文件层次结构，并向用户程序提供详细的内核数据信息。
+		/tmp:这个目录用来存放一些临时的文件，所有用户对此目录都有读写权限。
+		
+		
+module 2 login/logout	
+
+1.远程登录： telnet ip
+	login: usernmae
+	Password: password
+
+2.退出：
+	exit/logout
+	
+	logout,用来退出当前登录的shell
+	exit：可以退出所有，一般用exit就可以。
+
+3.password：
+	
+	一般要求应该在六位以上字符
+	复杂度尽可能高
+	必须和上次登录密码不同
+4.修改密码：
+	命令：passwd
+	作用：修改当前或指定用户密码
+	例如：
+		修改当前用户密码：
+		passwd  
+		Changing password for briup.
+		(current) UNIX password: 
+		Enter new UNIX password: 
+		Retype new UNIX password: 
+		
+		修改指定用户密码： passwd username
+		passwd briup
+5.切换用户：
+	su - username:
+	su username:
+	su -
+	su :
+
+	刚创建的操作系统root用户是没有密码的，没有密码的root用户时不能使用的。
+	创建系统的第一用户身份执行:sudo passwd
+
+6.记录用户信息的文件：
+  1./etc/passwd  ： 存放用户信息，密码是原来的第二项，后来提取到单独的shadow文件中
+	    root:x:0:0:root:/root:/bin/bash
+	username:x:uid:gid:user desc:家目录:登录时默认使用的shell
+  2./etc/shadow:  存放密码信息
+		记录加密密码。记录密码在什么时间可以使用，在什么时间失效。
+	
+  3.username uid
+  4.家目录		
+		
+module 3  Basic Unix Commands
+
+1.命令行语法
+   Command [options] [arguments]
+   
+   注意：
+	1.命令一定使用空格进行分割
+	2.命令一定严格区分大小写。
+	3.单行命令一般不超过256个字符
+
+2.clear ：清屏命令
+3.pwd：显示当前工作目录的绝对路径名  
+4.cd:    切换目录
+	cd  pathname
+	    绝对路径
+		相对路径
+	. ： 当前路径
+	.. : 父路径(上级目录)
+	~ ： 家目录
+	cd ~/Desktop ：进入家目录下的Desktop目录
+	cd   : 默认回到当前用户的家目录
+	cd ~ : 回到当前登录用户的家目录
+	cd ~用户名:进入到指定用户的家目录
+
+5.列出文件和目录的列表
+   ls [options] pathname
+   ls : 列出当前工作目录下的所有文件和目录列表（不包含隐藏文件）
+   ls -a: 显示所有文件包含隐藏文件。
+   ls -R: 显示递归的列表
+   ls -t:按照最后一次修改时间顺序显示文件和目录
+   ls -l:显示文件或目录的长列表信息
+    显示格式：
+	-rw-rw-r-- 1 briup briup  109 Jun 22 17:08 note.txt
+	1.文件类型：
+		-：普通文件
+		d：目录文件
+		l：链接文件
+		s：套接字文件
+		p：管道文件
+		b：块设备文件
+		c：字符设备文件
+	2.rwxrw-r--:代表文件权限
+	
+	  u  g  o
+	   r：读权限4
+	   w：写权限2
+	   x：执行权限1
+	   -：没有权限
+
+	   拥有者(user)  
+	   同组人(group)
+	   其他人(other)
+	   所有人(all)
+    3.拥有者
+	4.拥有组
+	5.文件大小
+	6.最有一次修改时间
+	7.文件名
+	
+	ls -F: 显示文件类型
+		目录: /
+		普通文件:
+		链接文件:@
+		可执行文件:*
+	ls -d: 显示指定目录 
+	ls -ld /opt: 显示/opt目录的长列表信息
+	ls -l /opt: 显示/opt目录下的所有文件和目录的长列表信息
+
+  类似的（自行体会区别）：
+	dir ： 效果类似ls
+	vdir:  效果类似ls -l
+  
+6.chmod : 修改文件权限
+  1.chmod mode filename
+	mode:
+		who    oper     perm
+		u		=		 r
+		g		+		 w
+		o		-		 x
+		a
+
+	chmod o+w HelloWorld.java
+  2.八进制数的形式标识
+	rw-rw-rw-
+	110 110 100
+	r : 4
+	w : 2
+	x : 1
+	- : 0
+	chmod 664 HelloWorld.java
+
+7.touch: 创建新的空的文件或者更新文件的最后一次访问时间
+8.mkdir:创建目录
+	mkdir  [options] pathname
+		-p : 加入父目录不存在，创建父目录
+9.cp : 拷贝文件
+ -i：提示是否覆盖
+	 src   dest       result
+cp   file  不存在     
+		   file      
+		   dir
+  -r dir   不存在
+		   file
+		   dir
+10.mv 移动或者重命名文件
+	 src   dest
+mv   file  不存在
+			file	
+		   dir
+	 dir   不存在
+		   dir	
+		   file
+
+11. rm    : 删除文件或者非空目录
+	rm -r :删除非空目录
+	rmdir : 删除空目录
+
+
+
+
+
+
+
+
+		  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+	
