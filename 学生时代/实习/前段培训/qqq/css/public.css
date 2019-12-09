@@ -1,0 +1,291 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+[v-cloak]{
+    display: none;
+}
+
+body {
+    background-color: #f5f5f5;
+    height: 100%;
+}
+
+li {
+    list-style: none;
+}
+
+a {
+    text-decoration: none; /* 去除下划线 */
+}
+
+.header {
+    width: 550px;
+    display: block;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.header h1 {
+    width: 100%;
+    font-size: 100px;
+    font-weight: 400;
+    color: rgba(175, 47, 47, 0.15);
+}
+
+.header .header-content {
+    border: 1px solid #bfbfbf;
+    position: absolute;
+    width: 550px;
+    height: 60px;
+    line-height: 60px;
+    background-color: rgba(256, 256, 256, 1);
+    box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.1);
+}
+
+.header-content .toggle {
+    position: absolute;
+    top: 6px;
+    left: 4px;
+    height: 49px;
+    width: 49px;
+    font-size: 22px;
+    color: #737373;
+    transform: rotate(90deg);
+    /*display: none*/
+}
+
+.header-content .opacity {
+    opacity: 0.2;
+}
+
+.header-content .new-todo {
+    position: relative;
+    top: 4px;
+    right: -28px;
+    border: none;
+    color: #4D4D4D;
+    background: rgba(0, 0, 0, 0);
+    outline: none;
+    width: 84%;
+    font-size: 21px;
+    font-family: inherit;
+    font-weight: inherit;
+    line-height: 1.4em;
+    border: 0;
+    box-sizing: border-box;
+
+    /*font-style:italic;*/
+}
+
+.main {
+    width: 539px;
+    position: relative;
+    margin: 0 auto;
+}
+
+.main .ul img, .header-content > label, .main > ul > li > span {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.ul {
+    position: absolute;
+    top: 62px;
+    left: -6px;
+}
+
+.main > .ul > li {
+    width: 550px;
+    height: 60px;
+    line-height: 60px;
+    background-color: rgba(256, 256, 256, 1);
+    box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.1);
+    border-left: 1px solid #bfbfbf;
+    border-right: 1px solid #bfbfbf;
+    border-bottom: 1px solid #bfbfbf;
+
+}
+
+.ul > li i {
+    position: relative;
+    left: 8px;
+    top: 4px;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #bfbfbf;
+    margin-top: 10px;
+    border-radius: 50%;
+    display: block;
+    float: left;
+    box-sizing: border-box;
+    opacity: 0.3;
+    z-index: 0;
+}
+
+li > i img {
+    display: none;
+    position: absolute;
+    top: -6px;
+    left: -9px;
+    opacity: 1;
+    z-index: 2;
+    border-radius: 60%;
+}
+
+li > div {
+    font-size: 24px;
+    line-height: 60px;
+    height: 60px;
+    width: 69%;
+    float: right;
+    margin-right: 100px;
+    transition: 0.5s;
+    overflow: hidden;
+}
+
+li > .on {
+    opacity: 0.1;
+    transition: 0.5s;
+    text-decoration: line-through;
+}
+
+.ul > li > span {
+    position: absolute;
+    left: 493px;
+    color: #AF5B5E;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    font-size: 20px;
+    float: right;
+    margin-top: 9px;
+    text-align: center;
+    opacity: 0.2;
+    cursor: pointer;
+    display: none;
+}
+
+li:hover > span {
+    display: block;
+}
+
+li > span:hover {
+    opacity: 1;
+    transition: all 0.5s ease;
+}
+
+.main .ul > li:nth-last-child(1) {
+    position: relative;
+}
+
+.edit{
+    position: relative;
+}
+ul .edit input{
+    font-size: 24px;
+    color: #4D4D4D;
+    position: absolute;
+    top: 3px;
+    width: 462px;
+    height: 51px;
+    right: 14px;
+    box-shadow: 0 0 0 0;
+    display: none;
+}
+
+.footer {
+    position: relative;
+    top: 61px;
+    width: 552px;
+    height: 40px;
+    background-color: rgba(256, 256, 256, 1);
+    /*padding: 10px;*/
+    border-left: 1px solid #bfbfbf;
+    border-right: 1px solid #bfbfbf;
+    border-bottom: 1px solid #bfbfbf;
+    box-sizing: border-box;
+}
+
+.footer-nav {
+    position: absolute;
+    top: 46px;
+    /*background-color: #4D4D4D;*/
+    height: 10px;
+
+}
+
+.nav-ul li {
+    padding: 17px;
+    font-size: 13px;
+    line-height: 20px;
+    float: left;
+    margin-top: -53px;
+    margin-right: 21px  ;
+
+}
+
+.nav-ul .all {
+    margin-right: -3px;
+    margin-left: 16px
+}
+
+.nav-ul .complete {
+    margin-right: 21px;
+    margin-left: -13px;
+}
+
+/***************** start增加和删除表动画***************/
+.v-enter,
+.v-leave-to {
+    opacity: 0;
+    transform: translateX(180px);
+}
+
+/* 入场动画的时间段*/
+.v-enter-active,
+.v-leave-active {
+    /* 默认opacity: 1;*/
+    transition: all 0.5s ease;
+}
+
+.v-move {
+    transition: all 0.5s ease;
+}
+
+.v-leave-active {
+    position: absolute;
+}
+
+/***************** end增加和删除表动画***************/
+
+/********* strat页尾 */
+.info {
+    margin: 135px auto 0;
+    color: #bfbfbf;
+    font-size: 10px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    text-align: center;
+}
+
+.info p {
+    line-height: 1;
+}
+
+.info a {
+    color: inherit;
+    font-weight: 400;
+}
+
+.info a:hover {
+    text-decoration: underline;
+}
+
+/********* end页尾 */
+
+
+
+

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>My first Vue Project</title>
+    <!-- <script src="https://cdn.staticfile.org/vue/2.2.2/vue.min.js"></script> -->
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <p v-color="'red'" v-cloak>{{ msg }}{{msg1 | hah('是的','笑')}}</p>
+        <input type="text" v-model="msg1" v-focus v-cloak>
+    </div>
+
+    <div id="app1" v-cloak>{{1+1}}</div>
+    <script src="js/vue.js"></script>
+    <script>
+        // 创建一个vue的实例对象
+        // 当我们导入包之后,在游览器的内存中,就多了一个Vue构造函数
+        // 注意:我们new出来的vm这个对象,就是我们 MVVM中的 VM调度者
+        const vm = new Vue({
+            el: '#app',
+            // 这里的data就是 MVVM中的 M ,专门用来保存每个页面的数据.
+            data: {     // data属性中,存放的是el中要用到的数据
+                msg: 'Hello Vue.js!',// 通过Vue提供的指令,很方便的就能把数据渲染到页面上,
+                msg1: ""
+            },
+            // 组jian
+            components: {
+
+            },
+            // 过滤器
+            filters: {
+                "hah": function (msg1, str,update) {
+                    console.log(str)
+                    return msg1.replace(/是的/g, update)
+                }
+            },
+            // 指令
+            directives: {
+                color: function (el, binding) {
+                    el.style.color = binding.value;
+                },
+                focus: {
+                    inserted: function (el) {
+                        el.focus()
+                    }
+                }
+            }
+        })
+        var vm1 = new Vue({
+            el: '#app1'
+        })
+    </script>
+</body>
+
+</html>
